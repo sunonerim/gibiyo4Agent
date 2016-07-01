@@ -103,6 +103,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if ( webview == null ) return ;
+
+        webview.goBack();
+    }
+
+
+
     // NotificationOpenedHandler is implemented in its own class instead of adding implements to MainActivity so we don't hold on to a reference of our first activity if it gets recreated.
     private class ExampleNotificationOpenedHandler implements OneSignal.NotificationOpenedHandler {
         /**
