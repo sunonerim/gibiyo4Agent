@@ -4,21 +4,21 @@ import android.app.Activity;
 import android.app.AlertDialog;
 //import android.content.Intent;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 //import android.view.View;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-//import android.widget.TextView;
-
 import com.onesignal.OneSignal;
-import com.onesignal.OneSignal.NotificationOpenedHandler;
-import com.onesignal.OneSignal.IdsAvailableHandler;
+//import com.onesignal.OneSignal.NotificationOpenedHandler;
+//import com.onesignal.OneSignal.IdsAvailableHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,8 +26,17 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     private WebView webview;
-    static Activity currentActivity;
+    static  Activity currentActivity;
+    static  String  AgentPhone = null;
 
+
+    static  public  String getAgentPhone () {
+        return AgentPhone;
+    }
+
+    static  public  void  setAgentPhone (String agent_phone) {
+        AgentPhone = agent_phone;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +63,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         webview = (WebView)findViewById(R.id.webView);
+        webview.getSettings().setJavaScriptEnabled(true);
+        String userAgent = webview.getSettings().getUserAgentString();
+        webview.getSettings().setUserAgentString(userAgent + " APP_GIBIYO_Android");
+        webview.addJavascriptInterface(new AndroidBridge(), "GibiyoAgentApp");
+
         webview.setWebViewClient(new WebClient()); // 응룡프로그램에서 직접 url 처리
+
         WebSettings set = webview.getSettings();
         set.setJavaScriptEnabled(true);
         set.setBuiltInZoomControls(false);
@@ -70,9 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (showLogCustomerId == null )
             webview.loadUrl("http://gibiyo-ogong.rhcloud.com/app/agent");
-        else
-            webview.loadUrl( String.format( "http://gibiyo-ogong.rhcloud.com/app/agent/user_log.jsp?CustomerId=%s", showLogCustomerId) );
-
+        else {
+            // 고객의 통화요청에 의한 고객 이용 이력 조회
+            webview.loadUrl(String.format("http://gibiyo-ogong.rhcloud.com/app/agent/user_log.jsp?CustomerId=%s", showLogCustomerId));
+        }
 
 
         // ########################  OneSignal Begin
@@ -98,8 +114,7 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
         // ########################  OneSignal ENd
-
-        OneSignal.startInit(this).setNotificationOpenedHandler(new ExampleNotificationOpenedHandler()).init();
+        //OneSignal.startInit(this).setNotificationOpenedHandler(new ExampleNotificationOpenedHandler()).init();
 
     }
 
@@ -209,5 +224,19 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
+    private final Handler handler = new Handler();
 
+    private class AndroidBridge {
+        @JavascriptInterface
+        public void receiveAgentId(final String arg) { // must be final
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    // 원하는 동작
+                    setAgentPhone(arg);
+                    Log.d( "AgentID", getAgentPhone() );
+                }
+            });
+        }
+    }
 }

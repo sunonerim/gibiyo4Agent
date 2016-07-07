@@ -30,13 +30,9 @@ public class IncomingCallBroadcastReceiver extends BroadcastReceiver {
 
     public static final String TAG = "PHONE STATE";
     public static final String $CheckUrl = "http://gibiyo-ogong.rhcloud.com/tsi/agent_call_request.jsp?AgentPhone=%s";
-
-    public static final String $UseLogUrl = "http://gibiyo-ogong.rhcloud.com/tsi/test_call_add.jsp?AgentPhone=%s&CustomerId=%s";
     private static String mLastState;
-    private static String AgentPhone = "010-9228-7377";
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -83,10 +79,6 @@ public class IncomingCallBroadcastReceiver extends BroadcastReceiver {
     }
 
 
-
-
-
-
     class PrimeThread extends Thread {
         long    minPrime;
         Context mContext;
@@ -99,7 +91,8 @@ public class IncomingCallBroadcastReceiver extends BroadcastReceiver {
 
 
         public void run() {
-            String  check_url =  String.format( IncomingCallBroadcastReceiver.$CheckUrl, AgentPhone );
+            String  check_url =  String.format( IncomingCallBroadcastReceiver.$CheckUrl, MainActivity.getAgentPhone() );
+            Log.d( "check_url", check_url  );
 
             String content = readThroughHttp( check_url );
             Log.d( "customer_id", content );
@@ -122,11 +115,11 @@ public class IncomingCallBroadcastReceiver extends BroadcastReceiver {
             try{
                 URL Url = new URL(strUrl);  // URL화 한다.
                 HttpURLConnection conn = (HttpURLConnection) Url.openConnection(); // URL을 연결한 객체 생성.
-                conn.setRequestMethod("GET"); // get방식 통신
-                conn.setDoOutput(true);       // 쓰기모드 지정
-                conn.setDoInput(true);        // 읽기모드 지정
-                conn.setUseCaches(false);     // 캐싱데이터를 받을지 안받을지
-                conn.setDefaultUseCaches(false); // 캐싱데이터 디폴트 값 설정
+                conn.setRequestMethod("GET");       // get방식 통신
+                conn.setDoOutput(true);             // 쓰기모드 지정
+                conn.setDoInput(true);              // 읽기모드 지정
+                conn.setUseCaches(false);           // 캐싱데이터를 받을지 안받을지
+                conn.setDefaultUseCaches(false);    // 캐싱데이터 디폴트 값 설정
 
 //            strCookie = conn.getHeaderField("Set-Cookie"); //쿠키데이터 보관
 
